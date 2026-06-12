@@ -78,7 +78,7 @@ section.show{display:block}
 
 /* scoreboard table */
 .board{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--pitch2)}
-.brow{display:grid;grid-template-columns:48px 1fr repeat(var(--cols,2),76px) 92px;align-items:center;
+.brow{display:grid;grid-template-columns:46px 1fr repeat(var(--cols,2),64px) 64px 96px;align-items:center;
   gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);transition:background .15s}
 .brow.head{background:var(--panel);border-bottom:1px solid var(--line2)}
 .brow.head span{font-family:"Saira Condensed";font-weight:600;letter-spacing:.06em;text-transform:uppercase;
@@ -367,8 +367,9 @@ function renderBoard(){
   const key=boardMode==="group"?"group":"tourn";
   const arr=all.map(x=>({name:x.name,score:x.s[key],s:x.s})).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
   const prizes=boardMode==="group"?[200,100,50]:[400,150,100];
-  const live=boardMode==="group"?(RESULTS.phase!=="preseason"):(RESULTS.phase==="final");
-  const pay=live?payouts(arr,prizes):{};
+  const live=RESULTS.phase!=="preseason";
+  const anyScore=arr.some(x=>x.score>0);
+  const pay=(live&&anyScore)?payouts(arr,prizes):{};
   const c1=boardMode==="group"?"Groups":"Tiers", c2=boardMode==="group"?"Tiers":"Final 4";
   let h=`<div class="brow head" style="--cols:2"><span class="rk">#</span><span class="nm">Entry</span><span class="hide-m">${c1}</span><span class="hide-m">${c2}</span><span>Pts</span><span>Prize</span></div>`;
   arr.forEach((r,i)=>{
@@ -387,14 +388,20 @@ function renderBoard(){
       <span class="cell hide-m">${a}</span>
       <span class="cell hide-m">${b}</span>
       <span class="tot">${r.score}</span>
-      <span class="pay ${pv?'':'none'}">${live?(pv?money(pv):"&mdash;"):"&mdash;"}</span></div>`;
+      <span class="pay ${pv?'':'none'}">${pv?money(pv):"&mdash;"}</span></div>`;
   });
   $("#board").innerHTML=h;
   $("#boardTitle").textContent=boardMode==="group"?"Group-stage race":"Tournament race";
   $("#boardSub").textContent=boardMode==="group"?"Group rankings + tier picks, scored through the group stage":"Tier picks (whole tournament) + final-four picks";
   const tg=$("#boardToggle");tg.className="toggle "+(boardMode==="group"?"grp":"trn");
-  let note=live?"Prizes shown reflect current standings. Ties split the combined prize money.":
-    (boardMode==="group"?"Prizes appear once group-stage results are entered.":"Prizes appear once the tournament is complete.");
+  let note;
+  if(RESULTS.phase==="preseason"||!anyScore){ note="Projected payouts appear once points are on the board."; }
+  else if(boardMode==="group"){ note=(RESULTS.phase==="group")
+      ?"Projected payouts \u2014 group stage in progress. Ties split the combined money."
+      :"Group-stage payouts, locked in. Ties split the combined money."; }
+  else { note=(RESULTS.phase==="final")
+      ?"Final payouts. Ties split the combined money."
+      :"Projected payouts \u2014 updates as the tournament plays out. Ties split the combined money."; }
   if(SHEET.csvUrl)note+=lastUpdated?(" &middot; Live from Google Sheets &middot; updated "+new Date(lastUpdated).toLocaleString()):" &middot; Reading from Google Sheets\u2026";
   $("#boardNote").innerHTML=note;
 }
