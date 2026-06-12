@@ -290,16 +290,17 @@ const TIER_ROSTERS = {
   "Tier 5": [], "Tier 6": [], "Tier 7": []
 };
 
-/* ===== LIVE SYNC (optional) — update scores for everyone without touching GitHub =====
-   One-time setup with a free JSONBin.io account (~5 min):
-     1. Sign up at jsonbin.io (free).
-     2. Create a new bin, paste  {}  as its content, click Create.
-     3. From the bin's URL, copy the BIN ID into SYNC.binId below.
-     4. Open API Keys, copy your X-ACCESS KEY into SYNC.readKey below.
-     5. Commit this file ONCE. After that you never commit again —
-        just use "Publish to everyone" in the results panel (the footer diamond).
-   Leave binId empty to stay in manual mode (generate-code + commit). */
-const SYNC = { binId: "", readKey: "" };
+/* ===== LIVE RESULTS via GOOGLE SHEETS (optional) — update scores without touching GitHub =====
+   The site reads results straight from a Google Sheet you control. To set up (one-time):
+     1. Open the "LTV Results" template sheet I gave you (or import it into your Sheet as a new tab).
+     2. File -> Share -> set "Anyone with the link" to Viewer.
+     3. File -> Share -> Publish to web -> pick the "Results" tab -> format CSV -> Publish.
+     4. Copy that published link into SHEET.csvUrl below.
+     5. (Optional) paste your normal sheet link into SHEET.editUrl for the "Open sheet" button.
+     6. Commit this file ONCE. After that you never commit again — just edit the Results tab,
+        and the live site updates within a couple of minutes.
+   Leave csvUrl empty to use the built-in manual panel (generate-code + commit) instead. */
+const SHEET = { csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzNip3detojyvh0PzK7bfqjTn9WeZZ6nsipent-MAUyYOJHHpP-soCC2TqFryjZ1LurKi7TjX0yaZL/pub?gid=1053892229&single=true&output=csv", editUrl: "" };
 
 const SLOT={Winner:1,Finalist:2,"3rd":3,"4th":4};
 const SLOTVAL={Winner:14,Finalist:10,"3rd":6,"4th":4};
@@ -387,7 +388,7 @@ function renderBoard(){
   const tg=$("#boardToggle");tg.className="toggle "+(boardMode==="group"?"grp":"trn");
   let note=live?"Prizes shown reflect current standings. Ties split the combined prize money.":
     (boardMode==="group"?"Prizes appear once group-stage results are entered.":"Prizes appear once the tournament is complete.");
-  if(SYNC.binId)note+=lastUpdated?(" &middot; Updated "+new Date(lastUpdated).toLocaleString()):" &middot; Live sync on";
+  if(SHEET.csvUrl)note+=lastUpdated?(" &middot; Live from Google Sheets &middot; updated "+new Date(lastUpdated).toLocaleString()):" &middot; Reading from Google Sheets\u2026";
   $("#boardNote").innerHTML=note;
 }
 
@@ -524,6 +525,7 @@ function tierTeams(){const s=new Set();DATA.participants.forEach(n=>TIERS.forEac
   return [...s].sort();}
 function allTeams(){const s=new Set();Object.values(DATA.groups).forEach(a=>a.forEach(t=>s.add(t)));return [...s].sort();}
 function renderAdmin(){
+  if(SHEET.csvUrl){ renderSheetPanel(); return; }
   let h=`<div class="adm"><h3>Tournament phase</h3><div class="cap">Controls which prizes are live.</div>
     <select id="ph">
       <option value="preseason">Pre-season &middot; picks locked</option>
@@ -554,29 +556,13 @@ function renderAdmin(){
     h+=`<div class="frow" style="grid-template-columns:120px 1fr"><span class="gl">${lab}</span>
       <select data-f4="${k}"><option value="">&mdash;</option>`+allTeams().map(t=>`<option ${RESULTS.finalFour[k]===t?'selected':''}>${t}</option>`).join('')+`</select></div>`;});
   h+=`</div></details></div>`;
-  // publish / export
-  h+=`<div class="adm"><h3>Save &amp; publish</h3>`;
-  if(SYNC.binId){
-    h+=`<div class="cap">Your entries already updated your screen. Push them live to everyone &mdash; no GitHub needed.</div>
-      <div class="tp" style="grid-template-columns:1fr auto">
-        <input id="mkey" type="password" placeholder="Your JSONBin master key" value="${getKey()}">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap">
-          <input type="checkbox" id="remember" ${getKey()?'checked':''}> remember on this device</label>
-      </div>
-      <button class="btn" id="pubBtn" style="margin-top:10px">Publish to everyone</button>
-      <details style="margin-top:14px"><summary>Manual backup (generate code)</summary>
-        <div class="steps" style="margin-top:8px">Prefer the file route any time: paste this over the <b>const RESULTS = {…}</b> block and commit.</div>
-        <button class="btn ghost" id="genBtn">Generate code</button>
-        <button class="btn ghost" id="copyBtn" style="display:none">Copy</button>
-        <textarea id="out" style="display:none" readonly></textarea></details>`;
-  } else {
-    h+=`<div class="cap">Live sync is off, so changes show on your screen only. To push updates to everyone without committing each time, set up free live sync (see the SYNC block at the top of index.html). For now, use the code route:</div>
-      <div class="steps">1. <b>Generate code</b>. 2. Copy it. 3. In <b>index.html</b>, replace the <b>const RESULTS = {…}</b> block. 4. Commit to GitHub &mdash; live in ~1 min.</div>
-      <button class="btn" id="genBtn">Generate code</button>
-      <button class="btn ghost" id="copyBtn" style="display:none">Copy</button>
-      <textarea id="out" style="display:none" readonly></textarea>`;
-  }
-  h+=`</div>`;
+  // manual export
+  h+=`<div class="adm"><h3>Save &amp; publish</h3>
+    <div class="cap">Changes here show on your screen only. To push them to everyone, either set up the Google Sheet (see the SHEET block at the top of index.html) or use the code route below.</div>
+    <div class="steps">1. <b>Generate code</b>. 2. Copy it. 3. In <b>index.html</b>, replace the <b>const RESULTS = {…}</b> block. 4. Commit to GitHub &mdash; live in ~1 min.</div>
+    <button class="btn" id="genBtn">Generate code</button>
+    <button class="btn ghost" id="copyBtn" style="display:none">Copy</button>
+    <textarea id="out" style="display:none" readonly></textarea></div>`;
   $("#adminMount").innerHTML=h;
   $("#ph").value=RESULTS.phase;
   $("#ph").onchange=e=>{RESULTS.phase=e.target.value;refresh();};
@@ -591,31 +577,39 @@ function renderAdmin(){
     const code="const RESULTS = "+JSON.stringify(cleanResults(),null,2)+";";
     const ta=$("#out");ta.style.display="block";ta.value=code;$("#copyBtn").style.display="inline-block";};
   $("#copyBtn").onclick=()=>{$("#out").select();document.execCommand("copy");$("#copyBtn").textContent="Copied";setTimeout(()=>$("#copyBtn").textContent="Copy",1500);};
-  if(SYNC.binId){
-    const pub=$("#pubBtn");
-    pub.onclick=async()=>{
-      const key=$("#mkey").value.trim();
-      if(!key){pub.textContent="Enter your master key first";setTimeout(()=>pub.textContent="Publish to everyone",2000);return;}
-      if($("#remember").checked)setKey(key);else setKey("");
-      const body=cleanResults();body.updated=new Date().toISOString();
-      pub.textContent="Publishing\u2026";pub.disabled=true;
-      try{
-        const r=await fetch("https://api.jsonbin.io/v3/b/"+SYNC.binId,{method:"PUT",
-          headers:{"Content-Type":"application/json","X-Master-Key":key},body:JSON.stringify(body)});
-        if(r.ok){lastUpdated=body.updated;pub.textContent="Published \u2713 live for everyone";refresh();}
-        else pub.textContent="Failed \u2014 check key & bin id";
-      }catch(e){pub.textContent="Failed \u2014 network error";}
-      pub.disabled=false;setTimeout(()=>pub.textContent="Publish to everyone",2800);
-    };
-  }
+}
+function fmtTeams(obj){const e=Object.entries(obj||{});if(!e.length)return "&mdash;";
+  return e.map(([t,p])=>`${t} <span style="color:var(--gold)">${(+p.gs||0)+(+p.ko||0)}p</span>`).join(", ");}
+function renderSheetPanel(){
+  const gs=RESULTS.groupStandings||{};const f=RESULTS.finalFour||{};
+  let grp=Object.keys(gs).length?Object.keys(gs).sort().map(g=>`${g}: ${(gs[g]||[]).map(x=>x||'&middot;').join(' &rsaquo; ')}`).join('<br>'):'None entered yet';
+  let fin=[f.winner,f.finalist,f.third,f.fourth].some(x=>x)?
+    `1 ${f.winner||'&mdash;'} &middot; 2 ${f.finalist||'&mdash;'} &middot; 3 ${f.third||'&mdash;'} &middot; 4 ${f.fourth||'&mdash;'}`:'Not set';
+  const phaseLbl={preseason:"Pre-season",group:"Group stage",knockout:"Knockouts",final:"Complete"}[RESULTS.phase]||RESULTS.phase;
+  let h=`<div class="adm"><h3>Live from Google Sheets</h3>
+    <div class="cap">Results are read straight from your sheet. Edit the <b>Results</b> tab and the site updates within a couple of minutes &mdash; no GitHub.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+      ${SHEET.editUrl?`<a class="btn" href="${SHEET.editUrl}" target="_blank" rel="noopener" style="text-decoration:none">Open results sheet</a>`:''}
+      <button class="btn ghost" id="refreshBtn">Refresh now</button>
+    </div>
+    <div class="steps" id="syncStat">${lastUpdated?("Last read "+new Date(lastUpdated).toLocaleString()):"Reading\u2026"}</div>
+  </div>
+  <div class="adm"><h3>What the site is reading now</h3>
+    <div class="lone">
+      <div class="li"><span class="who">Phase</span><span class="what">${phaseLbl}</span></div>
+      <div class="li"><span class="who">Group results</span><span class="what" style="text-align:right">${grp}</span></div>
+      <div class="li"><span class="who">Tier team points</span><span class="what" style="text-align:right">${fmtTeams(RESULTS.teamPoints)}</span></div>
+      <div class="li"><span class="who">Final four</span><span class="what">${fin}</span></div>
+    </div></div>`;
+  $("#adminMount").innerHTML=h;
+  const rb=$("#refreshBtn");
+  if(rb)rb.onclick=async()=>{rb.textContent="Refreshing\u2026";await fetchRemote();renderSheetPanel();refresh();rb.textContent="Refresh now";};
 }
 function cleanResults(){
   const c={phase:RESULTS.phase,groupStandings:{},teamPoints:RESULTS.teamPoints,finalFour:RESULTS.finalFour};
   for(const g in RESULTS.groupStandings){const a=RESULTS.groupStandings[g];if(a&&a.some(x=>x))c.groupStandings[g]=a;}
   return c;
 }
-function getKey(){try{return localStorage.getItem("ltvKey")||""}catch(e){return ""}}
-function setKey(k){try{k?localStorage.setItem("ltvKey",k):localStorage.removeItem("ltvKey")}catch(e){}}
 function refresh(){
   const txt={preseason:"Picks locked &middot; awaiting kickoff",group:"Group stage in progress",knockout:"Knockout rounds in progress",final:"Champions crowned &middot; final standings"}[RESULTS.phase];
   $("#phaseTxt").innerHTML=txt;
@@ -636,31 +630,55 @@ document.addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)op
 $("#scrim").addEventListener("click",e=>{if(e.target===$("#scrim"))$("#scrim").classList.remove("show");});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#scrim").classList.remove("show");});
 
+function parseCSV(text){ // tolerant CSV -> array of rows (arrays of cells)
+  const rows=[];let row=[],cell="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+    else { if(c==='"')q=true;
+      else if(c===','){row.push(cell);cell="";}
+      else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell="";}
+      else if(c==='\r'){}
+      else cell+=c; } }
+  if(cell.length||row.length){row.push(cell);rows.push(row);}
+  return rows;
+}
+const SLOTKEY={"winner":"winner","finalist":"finalist","runner-up":"finalist","runner up":"finalist",
+  "3rd":"third","3rd place":"third","third":"third","4th":"fourth","4th place":"fourth","fourth":"fourth"};
+function applySheet(text){
+  const rows=parseCSV(text);
+  const next={phase:"preseason",groupStandings:{},teamPoints:{},finalFour:{winner:null,finalist:null,third:null,fourth:null}};
+  let any=false;
+  rows.forEach(r=>{
+    const type=(r[0]||"").trim().toUpperCase();
+    if(type==="PHASE"){const v=(r[1]||"").trim().toLowerCase();if(v)next.phase=v;any=true;}
+    else if(type==="GROUP"){const g=(r[1]||"").trim();if(!g)return;
+      next.groupStandings[g]=[1,2,3,4].map(i=>{const t=(r[i+1]||"").trim();return t||null;});any=true;}
+    else if(type==="TEAM"){const t=(r[1]||"").trim();if(!t)return;
+      const gs=parseFloat(r[2]),ko=parseFloat(r[3]);
+      next.teamPoints[t]={gs:isNaN(gs)?0:gs,ko:isNaN(ko)?0:ko};any=true;}
+    else if(type==="FINAL"){const slot=SLOTKEY[(r[1]||"").trim().toLowerCase()];const t=(r[2]||"").trim();
+      if(slot)next.finalFour[slot]=t||null;any=true;}
+  });
+  if(!any)return false;
+  // prune empty group rows so they read as "not entered"
+  for(const g in next.groupStandings){if(!next.groupStandings[g].some(x=>x))delete next.groupStandings[g];}
+  RESULTS.phase=next.phase;RESULTS.groupStandings=next.groupStandings;
+  RESULTS.teamPoints=next.teamPoints;RESULTS.finalFour=next.finalFour;
+  lastUpdated=new Date().toISOString();
+  return true;
+}
 async function fetchRemote(){
-  if(!SYNC.binId)return false;
+  if(!SHEET.csvUrl)return false;
   try{
-    const r=await fetch("https://api.jsonbin.io/v3/b/"+SYNC.binId+"/latest",
-      {headers:SYNC.readKey?{"X-Access-Key":SYNC.readKey}:{}});
+    const r=await fetch(SHEET.csvUrl,{cache:"no-store"});
     if(!r.ok)return false;
-    const rec=(await r.json()).record;
-    if(rec&&rec.phase){
-      RESULTS.phase=rec.phase;
-      RESULTS.groupStandings=rec.groupStandings||{};
-      RESULTS.teamPoints=rec.teamPoints||{};
-      RESULTS.finalFour=rec.finalFour||{winner:null,finalist:null,third:null,fourth:null};
-      lastUpdated=rec.updated||lastUpdated;
-      return true;
-    }
-  }catch(e){}
-  return false;
+    return applySheet(await r.text());
+  }catch(e){return false;}
 }
 async function init(){ await fetchRemote(); renderAdmin(); refresh(); }
-async function poll(){ // keep viewers current, but never clobber the host mid-edit
-  if(document.getElementById("update").classList.contains("show"))return;
-  if(await fetchRemote())refresh();
-}
+async function poll(){ if(await fetchRemote()){refresh();if(document.getElementById("update").classList.contains("show"))renderSheetPanel();} }
 init();
-if(SYNC.binId)setInterval(poll,60000);
+if(SHEET.csvUrl)setInterval(poll,90000);
 </script>
 </body>
 </html>
