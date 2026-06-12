@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LTV 2026 World Cup Pool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pitch:#08180f; --pitch2:#0c2417; --panel:#0f2a1b; --panel2:#103120;
+  --line:rgba(125,209,156,.14); --line2:rgba(125,209,156,.28);
+  --chalk:#eaf3ec; --muted:#85a18f; --dim:#5d7567;
+  --gold:#f4c64e; --gold-dim:#9c7e2b;
+  --grp:#3fb7f0; --grp-dim:#1b5e7d;
+  --trn:#ff4f86; --trn-dim:#8f2a4c;
+  --silver:#c7d3cb; --bronze:#d4925f;
+  --ok:#5fd08a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--pitch);color:var(--chalk);font-family:Inter,system-ui,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 50% -10%, rgba(63,183,240,.06), transparent 55%),
+    repeating-linear-gradient(180deg, transparent 0 38px, rgba(125,209,156,.022) 38px 76px);}
+h1,h2,h3{font-family:"Saira Condensed",sans-serif;font-weight:700;letter-spacing:.01em;margin:0}
+.mono{font-family:"Space Mono",monospace}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* header */
+header{position:sticky;top:0;z-index:40;background:rgba(8,24,15,.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:18px;height:62px}
+.mark{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.crest{width:30px;height:30px;border-radius:7px;background:
+  conic-gradient(from 210deg,var(--trn),var(--gold),var(--grp),var(--trn));
+  box-shadow:0 0 0 1px var(--line2), inset 0 0 8px rgba(0,0,0,.4);position:relative}
+.crest::after{content:"";position:absolute;inset:7px;border-radius:3px;background:var(--pitch);}
+.wordmark{font-family:"Saira Condensed";font-weight:800;font-size:18px;letter-spacing:.03em;line-height:1;text-transform:uppercase}
+.wordmark span{color:var(--gold)}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{font-family:"Saira Condensed";font-weight:600;font-size:14.5px;letter-spacing:.04em;text-transform:uppercase;
+  background:none;border:0;color:var(--muted);padding:8px 13px;border-radius:8px;cursor:pointer;transition:.15s}
+nav button:hover{color:var(--chalk);background:var(--panel)}
+nav button.on{color:var(--pitch);background:var(--chalk)}
+
+/* hero */
+.hero{padding:30px 0 16px}
+.eyebrow{font-family:"Saira Condensed";font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  font-size:12px;color:var(--muted)}
+.hero h1{font-size:clamp(38px,7vw,76px);line-height:.92;font-weight:800;text-transform:uppercase;margin:6px 0 2px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.phase{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 13px;border:1px solid var(--line2);
+  border-radius:999px;font-family:"Saira Condensed";font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.stakes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.stake{border:1px solid var(--line);border-radius:14px;padding:15px 17px;background:linear-gradient(180deg,var(--panel),transparent)}
+.stake .k{font-family:"Saira Condensed";font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-size:12.5px}
+.stake .v{font-family:"Space Mono";font-weight:700;font-size:27px;margin-top:3px}
+.stake.gold .v{color:var(--gold)} .stake.grp .v{color:var(--grp)} .stake.trn .v{color:var(--trn)}
+.stake small{display:block;color:var(--dim);font-size:11.5px;margin-top:4px;font-family:Inter}
+
+/* sections */
+section{padding:30px 0;display:none}
+section.show{display:block}
+.shead{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.shead h2{font-size:30px;text-transform:uppercase;letter-spacing:.01em}
+.shead p{color:var(--muted);font-size:13.5px;margin:0}
+
+/* toggle */
+.toggle{display:inline-flex;border:1px solid var(--line2);border-radius:11px;padding:4px;gap:4px;background:var(--pitch2)}
+.toggle button{font-family:"Saira Condensed";font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:14px;
+  border:0;background:none;color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;transition:.15s}
+.toggle button.on{color:var(--pitch)}
+.toggle.grp button.on{background:var(--grp)} .toggle.trn button.on{background:var(--trn)}
+
+/* scoreboard table */
+.board{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--pitch2)}
+.brow{display:grid;grid-template-columns:48px 1fr repeat(var(--cols,2),76px) 92px;align-items:center;
+  gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);transition:background .15s}
+.brow.head{background:var(--panel);border-bottom:1px solid var(--line2)}
+.brow.head span{font-family:"Saira Condensed";font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  font-size:11.5px;color:var(--muted);text-align:right}
+.brow.head .nm{text-align:left}
+.brow:last-child{border-bottom:0}
+.brow:not(.head):hover{background:var(--panel)}
+.rk{font-family:"Space Mono";font-weight:700;font-size:16px;color:var(--muted);text-align:center}
+.brow.p1 .rk,.brow.p2 .rk,.brow.p3 .rk{color:var(--pitch);border-radius:7px;height:30px;line-height:30px;width:30px;margin:0 auto}
+.brow.p1 .rk{background:var(--gold)} .brow.p2 .rk{background:var(--silver)} .brow.p3 .rk{background:var(--bronze)}
+.nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:9px;min-width:0}
+.nm b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flag{font-size:11px;color:var(--trn);border:1px solid var(--trn-dim);border-radius:5px;padding:1px 5px;font-weight:600;flex-shrink:0}
+.cell{font-family:"Space Mono";text-align:right;color:var(--muted);font-size:14px}
+.tot{font-family:"Space Mono";font-weight:700;text-align:right;font-size:18px}
+.pay{font-family:"Space Mono";font-weight:700;text-align:right;font-size:15px;color:var(--gold)}
+.pay.none{color:var(--dim);font-weight:400}
+.lock{text-align:center;color:var(--dim);padding:18px;font-size:13px}
+
+/* picks grid */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:15px 16px;background:linear-gradient(180deg,var(--panel),transparent);
+  cursor:pointer;transition:.15s;text-align:left;color:inherit}
+.pcard:hover{border-color:var(--line2);transform:translateY(-2px)}
+.pcard h3{font-size:20px;text-transform:uppercase;letter-spacing:.01em}
+.pcard .sub{color:var(--muted);font-size:12.5px;margin-top:3px;display:flex;gap:8px;align-items:center}
+.pcard .champ{margin-top:12px;font-size:12.5px;color:var(--dim)}
+.pcard .champ b{color:var(--chalk);font-weight:600}
+.ppk{display:flex;flex-direction:column;gap:0;margin-top:13px}
+.pp{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;
+  border-bottom:1px dashed var(--line);padding:5px 0}
+.pp:last-child{border-bottom:0}
+.ppk-k{font-family:"Saira Condensed";font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:11px;color:var(--muted)}
+.ppk-v{font-weight:600;text-align:right}
+.ptiers{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.tchip{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:var(--chalk)}
+.pmore{margin-top:13px;font-size:10.5px;color:var(--dim);font-family:"Saira Condensed";letter-spacing:.06em;text-transform:uppercase}
+.chip{font-family:"Saira Condensed";font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 7px;border-radius:6px;border:1px solid var(--line2);color:var(--muted)}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(3,10,6,.72);backdrop-filter:blur(4px);z-index:50;
+  display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.scrim.show{display:flex}
+.modal{background:var(--pitch2);border:1px solid var(--line2);border-radius:18px;max-width:860px;width:100%;padding:26px}
+.mtop{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.mtop h2{font-size:34px;text-transform:uppercase}
+.mtop .x{margin-left:auto;background:var(--panel);border:1px solid var(--line2);color:var(--chalk);
+  width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:18px;flex-shrink:0}
+.mscore{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.mscore div{border:1px solid var(--line);border-radius:10px;padding:8px 13px}
+.mscore .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:"Saira Condensed";font-weight:600}
+.mscore .v{font-family:"Space Mono";font-weight:700;font-size:20px}
+.mscore .grp .v{color:var(--grp)} .mscore .trn .v{color:var(--trn)}
+.mh{font-family:"Saira Condensed";font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:15px;
+  color:var(--muted);margin:24px 0 11px;border-top:1px solid var(--line);padding-top:16px}
+.tiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.tier{border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.tier .k{font-size:11px;color:var(--muted);font-family:"Saira Condensed";font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tier .v{font-weight:600;margin-top:2px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tier .pts{font-family:"Space Mono";font-size:12px;color:var(--gold)}
+.f4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.f4 .slot{border:1px solid var(--line);border-radius:10px;padding:10px 11px;text-align:center}
+.f4 .slot .k{font-family:"Saira Condensed";font-weight:600;text-transform:uppercase;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.f4 .slot .v{font-weight:600;margin-top:4px;font-size:14px}
+.f4 .slot .pts{font-family:"Space Mono";font-size:11px;color:var(--gold);margin-top:3px}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
+.gtab{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.gtab .gh{background:var(--panel);padding:6px 10px;font-family:"Saira Condensed";font-weight:700;text-transform:uppercase;
+  font-size:13px;letter-spacing:.06em;display:flex;justify-content:space-between}
+.gtab .gh .gp{font-family:"Space Mono";color:var(--gold);font-size:12px}
+.gtab ol{margin:0;padding:6px 10px 8px 10px;list-style:none;counter-reset:r}
+.gtab li{counter-increment:r;font-size:13px;padding:2.5px 0;display:flex;gap:7px;align-items:center}
+.gtab li::before{content:counter(r);font-family:"Space Mono";font-size:11px;color:var(--dim);width:12px}
+.gtab li.hit{color:var(--ok)} .gtab li.hit::before{color:var(--ok)}
+.missing{color:var(--trn);font-size:13px;padding:8px 10px}
+
+/* stats */
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.scard{border:1px solid var(--line);border-radius:14px;padding:18px;background:linear-gradient(180deg,var(--panel),transparent)}
+.scard h3{font-size:19px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:3px}
+.scard .cap{color:var(--muted);font-size:12.5px;margin-bottom:14px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.barrow{display:grid;grid-template-columns:104px 1fr 40px;align-items:center;gap:9px;font-size:13px}
+.barrow .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:9px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.fill{height:100%;border-radius:6px;background:var(--gold)}
+.barrow .pc{font-family:"Space Mono";font-size:12px;color:var(--muted);text-align:right}
+.lone{display:flex;flex-direction:column;gap:9px}
+.lone .li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.lone .li:last-child{border:0}
+.lone .who{font-weight:600} .lone .what{color:var(--muted);text-align:right}
+.lone .what b{color:var(--trn);font-weight:600}
+.twins .li .what b{color:var(--grp)}
+.big{font-family:"Space Mono";font-weight:700;font-size:42px;text-align:center;margin:6px 0}
+.big.gold{color:var(--gold)}
+
+/* admin */
+.adm{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--panel);margin-bottom:14px}
+.adm h3{font-size:20px;text-transform:uppercase;margin-bottom:4px}
+.adm .cap{color:var(--muted);font-size:13px;margin-bottom:16px}
+.adm details{border-top:1px solid var(--line);padding:12px 0}
+.adm summary{cursor:pointer;font-family:"Saira Condensed";font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:16px}
+.frow{display:grid;grid-template-columns:90px repeat(4,1fr);gap:8px;align-items:center;margin:8px 0}
+.frow .gl{font-family:"Saira Condensed";font-weight:700;font-size:15px}
+select,input[type=number],input[type=text],input[type=password]{background:var(--pitch);border:1px solid var(--line2);color:var(--chalk);
+  border-radius:8px;padding:7px 9px;font-family:Inter;font-size:13px;width:100%}
+input[type=checkbox]{width:auto}
+.tp{display:grid;grid-template-columns:1fr 80px 80px;gap:8px;align-items:center;margin:6px 0}
+.tp label{font-size:13px}
+.btn{font-family:"Saira Condensed";font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:15px;
+  background:var(--gold);color:var(--pitch);border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+.btn.ghost{background:none;border:1px solid var(--line2);color:var(--chalk)}
+textarea{width:100%;min-height:160px;background:var(--pitch);border:1px solid var(--line2);color:var(--ok);
+  border-radius:10px;padding:12px;font-family:"Space Mono";font-size:12px;margin-top:12px}
+.steps{font-size:13px;color:var(--muted);margin:12px 0}
+.steps b{color:var(--chalk)}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--dim);font-size:12.5px;text-align:center;margin-top:20px}
+.adminDot{display:inline-block;width:10px;height:10px;margin-left:12px;transform:rotate(45deg);
+  background:var(--line2);border-radius:2px;cursor:pointer;vertical-align:middle;opacity:.45;transition:.2s}
+.adminDot:hover{opacity:1;background:var(--gold);box-shadow:0 0 9px var(--gold)}
+@media(max-width:620px){
+  .stakes{grid-template-columns:1fr}
+  .brow{grid-template-columns:34px 1fr 60px 80px;font-size:13px}
+  .brow .cell.hide-m{display:none}
+  .f4{grid-template-columns:repeat(2,1fr)}
+  nav{gap:0}
+  .hero h1{font-size:46px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="mark"><div class="crest"></div>
+    <div class="wordmark">LTV 2026 <span>World Cup Pool</span></div></div>
+  <nav id="nav">
+    <button data-t="standings" class="on">Standings</button>
+    <button data-t="picks">Picks</button>
+    <button data-t="stats">Stats</button>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">United 2026 &middot; 25 entries &middot; $40 buy-in</div>
+    <h1>The <em>#Footy</em> Pool</h1>
+    <div class="phase" id="phaseTag"><span class="dot"></span><span id="phaseTxt">Picks locked &middot; awaiting kickoff</span></div>
+    <div class="stakes">
+      <div class="stake gold"><div class="k">Total pot</div><div class="v">$1,000</div><small>25 entries &times; $40</small></div>
+      <div class="stake grp"><div class="k">Group-stage prize</div><div class="v">$350</div><small>$200 / $100 / $50 &middot; groups + tiers</small></div>
+      <div class="stake trn"><div class="k">Tournament prize</div><div class="v">$650</div><small>$400 / $150 / $100 &middot; tiers + final four</small></div>
+    </div>
+  </div>
+
+  <section id="standings" class="show">
+    <div class="shead">
+      <h2 id="boardTitle">Group-stage race</h2>
+      <p id="boardSub">Group rankings + tier picks, scored through the group stage</p>
+      <div style="margin-left:auto" id="boardToggle" class="toggle grp">
+        <button data-b="group" class="on">Group race</button>
+        <button data-b="tourn">Tournament race</button>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+    <p style="color:var(--dim);font-size:12px;margin-top:12px" id="boardNote"></p>
+  </section>
+
+  <section id="picks">
+    <div class="shead"><h2>Everyone's picks</h2><p>Tap any entry to see their full card &mdash; all public.</p></div>
+    <div class="pgrid" id="pgrid"></div>
+  </section>
+
+  <section id="stats">
+    <div class="shead"><h2>The picks, dissected</h2><p>Where the room agrees, where it splits, and who went rogue.</p></div>
+    <div class="scards" id="scards"></div>
+  </section>
+
+  <section id="update">
+    <div class="shead"><h2>Update results</h2><p>Enter what actually happens. Scores recompute live. Then commit the code to update the live site for everyone.</p></div>
+    <div id="adminMount"></div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<footer class="wrap">LTV 2026 World Cup Pool &middot; built for trash talk<span class="adminDot" id="adminDot" aria-label="results entry"></span></footer>
+
+<script>
+const DATA = {"participants": ["Aaron Condron", "Adrian Salonga", "Ajay Sameer", "Alan Evans", "Alessandro Mannino", "Alex Bayer", "Ana Sosa", "Arthur Munoz", "Dhyuti Patel", "Federico Segui", "Gabriel Murrillo", "Gina Lee", "Josh Essig", "Josh Levy", "Manuel Beita", "Mauricio Roldan", "Michael Bollhardt", "Nana Boyer", "Peter Jough", "Sal Mastrobattista", "Sasha Tarnoczy", "Sebastian Castro", "Shawn Siegel", "Steve Rosegger", "Suzie Morales"], "part1": {"Aaron Condron": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Iran", "3": "Egypt", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "Croatia", "2": "England", "3": "Panama", "4": "Ghana"}}, "Adrian Salonga": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Scotland", "3": "Morocco", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Senegal", "3": "Norway", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "Croatia", "2": "England", "3": "Ghana", "4": "Panama"}}, "Ajay Sameer": {"A": {"1": "South Korea", "2": "Mexico", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Bosnia & Herzegovina", "3": "Canada", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Australia", "4": "Paraguay"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Sweden", "2": "Netherlands", "3": "Japan", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Senegal", "3": "Norway", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "DR Congo", "3": "Colombia", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Alan Evans": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Canada", "2": "Switzerland", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Ecuador", "2": "Germany", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Japan", "2": "Netherlands", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Algeria", "3": "Austria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Alessandro Mannino": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Bosnia & Herzegovina", "3": "Canada", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Australia", "4": "Paraguay"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Sweden", "3": "Japan", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Panama", "4": "Ghana"}}, "Alex Bayer": {"A": {"1": "Mexico", "2": "South Africa", "3": "Czechia", "4": "South Korea"}, "B": {"1": "Qatar", "2": "Bosnia & Herzegovina", "3": "Switzerland", "4": "Canada"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Paraguay", "2": "USA", "3": "Turkey", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Tunisia", "4": "Sweden"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Iraq", "3": "Norway", "4": "Senegal"}, "J": {"1": "Argentina", "2": "Algeria", "3": "Austria", "4": "Jordan"}, "K": {"1": "Colombia", "2": "Portugal", "3": "Uzbekistan", "4": "DR Congo"}, "L": {"1": "Panama", "2": "England", "3": "Ghana", "4": "Croatia"}}, "Ana Sosa": {"A": {"1": "Mexico", "2": "Czechia", "3": "South Korea", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Qatar", "4": "Bosnia & Herzegovina"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Australia", "4": "Paraguay"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Jordan", "4": "Algeria"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Panama", "4": "Ghana"}}, "Arthur Munoz": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Paraguay", "3": "Turkey", "4": "Australia"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "Uzbekistan", "4": "DR Congo"}, "L": {"1": "England", "2": "Croatia", "3": "Panama", "4": "Ghana"}}, "Dhyuti Patel": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Bosnia & Herzegovina", "3": "Canada", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "Australia", "3": "USA", "4": "Paraguay"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Senegal", "3": "Norway", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Federico Segui": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Morocco", "2": "Brazil", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Paraguay", "2": "USA", "3": "Turkey", "4": "Australia"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Sweden", "3": "Japan", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "Uzbekistan", "4": "DR Congo"}, "L": {"1": "Croatia", "2": "England", "3": "Panama", "4": "Ghana"}}, "Gabriel Murrillo": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Qatar", "4": "Bosnia & Herzegovina"}, "C": {"1": "Brazil", "2": "Scotland", "3": "Morocco", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Senegal", "3": "Iraq", "4": "Norway"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Colombia", "2": "Portugal", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "Croatia", "2": "England", "3": "Ghana", "4": "Panama"}}, "Gina Lee": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Canada", "2": "Switzerland", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Iran", "3": "Egypt", "4": "New Zealand"}, "H": {"1": "Uruguay", "2": "Spain", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Josh Essig": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "Uzbekistan", "4": "DR Congo"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Josh Levy": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Manuel Beita": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Iran", "3": "Egypt", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Mauricio Roldan": {"A": {"1": "South Korea", "2": "Mexico", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Canada", "2": "Switzerland", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Paraguay", "2": "USA", "3": "Turkey", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Tunisia", "4": "Sweden"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Algeria", "3": "Austria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Michael Bollhardt": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Nana Boyer": {"A": {"1": "Czechia", "2": "Mexico", "3": "South Africa", "4": "South Korea"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Scotland", "3": "Morocco", "4": "Haiti"}, "D": {"1": "USA", "2": "Paraguay", "3": "Australia", "4": "Turkey"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Sweden", "3": "Japan", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "New Zealand", "3": "Egypt", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "Ghana", "2": "England", "3": "Croatia", "4": "Panama"}}, "Peter Jough": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Senegal", "3": "Norway", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Sal Mastrobattista": {"A": {"1": "South Korea", "2": "Mexico", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "USA", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Sasha Tarnoczy": {"A": {"1": "Mexico", "2": "Czechia", "3": "South Korea", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Bosnia & Herzegovina", "3": "Canada", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "Turkey", "2": "Paraguay", "3": "USA", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Sebastian Castro": {"A": {"1": "Mexico", "2": "South Korea", "3": "South Africa", "4": "Czechia"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Haiti", "4": "Scotland"}, "D": {"1": "USA", "2": "Paraguay", "3": "Turkey", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Japan", "2": "Netherlands", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Senegal", "3": "Norway", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Ghana", "3": "Croatia", "4": "Panama"}}, "Shawn Siegel": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Qatar", "4": "Bosnia & Herzegovina"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Paraguay", "3": "Australia", "4": "Turkey"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Tunisia", "4": "Sweden"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Algeria", "3": "Austria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "Uzbekistan", "4": "DR Congo"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Steve Rosegger": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ecuador", "3": "Ivory Coast", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Japan", "3": "Sweden", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "Iran", "4": "New Zealand"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Cape Verde", "4": "Saudi Arabia"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}, "Suzie Morales": {"A": {"1": "Mexico", "2": "South Korea", "3": "Czechia", "4": "South Africa"}, "B": {"1": "Switzerland", "2": "Canada", "3": "Bosnia & Herzegovina", "4": "Qatar"}, "C": {"1": "Brazil", "2": "Morocco", "3": "Scotland", "4": "Haiti"}, "D": {"1": "USA", "2": "Turkey", "3": "Paraguay", "4": "Australia"}, "E": {"1": "Germany", "2": "Ivory Coast", "3": "Ecuador", "4": "Curaçao"}, "F": {"1": "Netherlands", "2": "Sweden", "3": "Japan", "4": "Tunisia"}, "G": {"1": "Belgium", "2": "Egypt", "3": "New Zealand", "4": "Iran"}, "H": {"1": "Spain", "2": "Uruguay", "3": "Saudi Arabia", "4": "Cape Verde"}, "I": {"1": "France", "2": "Norway", "3": "Senegal", "4": "Iraq"}, "J": {"1": "Argentina", "2": "Austria", "3": "Algeria", "4": "Jordan"}, "K": {"1": "Portugal", "2": "Colombia", "3": "DR Congo", "4": "Uzbekistan"}, "L": {"1": "England", "2": "Croatia", "3": "Ghana", "4": "Panama"}}}, "part2": {"Aaron Condron": {"Tier 1": "France", "Tier 2": "Germany", "Tier 3": "Croatia", "Tier 4": "Switzerland", "Tier 5": "Canada", "Tier 6": "South Korea", "Tier 7": "Panama"}, "Adrian Salonga": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "Croatia", "Tier 4": "Ecuador", "Tier 5": "Canada", "Tier 6": "Scotland", "Tier 7": "Cape Verde"}, "Ajay Sameer": {"Tier 1": "France", "Tier 2": "Portugal", "Tier 3": "Croatia", "Tier 4": "Senegal", "Tier 5": "Sweden", "Tier 6": "Ivory Coast", "Tier 7": "DR Congo"}, "Alan Evans": {"Tier 1": "Spain", "Tier 2": "Netherlands", "Tier 3": "Norway", "Tier 4": "Ecuador", "Tier 5": "Sweden", "Tier 6": "South Korea", "Tier 7": "DR Congo"}, "Alessandro Mannino": {"Tier 1": "England", "Tier 2": "Portugal", "Tier 3": "Colombia", "Tier 4": "Turkey", "Tier 5": "Canada", "Tier 6": "Scotland", "Tier 7": "DR Congo"}, "Alex Bayer": {"Tier 1": "Argentina", "Tier 2": "Netherlands", "Tier 3": "Mexico", "Tier 4": "Ecuador", "Tier 5": "Paraguay", "Tier 6": "Ghana", "Tier 7": "South Africa"}, "Ana Sosa": {"Tier 1": "Argentina", "Tier 2": "Germany", "Tier 3": "Croatia", "Tier 4": "Uruguay", "Tier 5": "Sweden", "Tier 6": "South Korea", "Tier 7": "Panama"}, "Arthur Munoz": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "Colombia", "Tier 4": "Uruguay", "Tier 5": "Paraguay", "Tier 6": "Ivory Coast", "Tier 7": "Saudi Arabia"}, "Dhyuti Patel": {"Tier 1": "France", "Tier 2": "Netherlands", "Tier 3": "Mexico", "Tier 4": "Japan", "Tier 5": "Austria", "Tier 6": "Scotland", "Tier 7": "South Africa"}, "Federico Segui": {"Tier 1": "Argentina", "Tier 2": "Belgium", "Tier 3": "Croatia", "Tier 4": "Uruguay", "Tier 5": "Sweden", "Tier 6": "Ivory Coast", "Tier 7": "New Zealand"}, "Gabriel Murrillo": {"Tier 1": "Spain", "Tier 2": "Germany", "Tier 3": "Colombia", "Tier 4": "Senegal", "Tier 5": "Egypt", "Tier 6": "Scotland", "Tier 7": "Qatar"}, "Gina Lee": {"Tier 1": "Argentina", "Tier 2": "Portugal", "Tier 3": "Colombia", "Tier 4": "Uruguay", "Tier 5": "Canada", "Tier 6": "Ivory Coast", "Tier 7": "Panama"}, "Josh Essig": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "Colombia", "Tier 4": "Uruguay", "Tier 5": "Austria", "Tier 6": "South Korea", "Tier 7": "Saudi Arabia"}, "Josh Levy": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "Norway", "Tier 4": "Turkey", "Tier 5": "Canada", "Tier 6": "South Korea", "Tier 7": "DR Congo"}, "Manuel Beita": {"Tier 1": "France", "Tier 2": "Portugal", "Tier 3": "Norway", "Tier 4": "Japan", "Tier 5": "Iran", "Tier 6": "South Korea", "Tier 7": "Saudi Arabia"}, "Mauricio Roldan": {"Tier 1": "Spain", "Tier 2": "Netherlands", "Tier 3": "Colombia", "Tier 4": "Uruguay", "Tier 5": "Paraguay", "Tier 6": "South Korea", "Tier 7": "DR Congo"}, "Michael Bollhardt": {"Tier 1": "Spain", "Tier 2": "Germany", "Tier 3": "Mexico", "Tier 4": "Switzerland", "Tier 5": "Canada", "Tier 6": "South Korea", "Tier 7": "Panama"}, "Nana Boyer": {"Tier 1": "France", "Tier 2": "Portugal", "Tier 3": "Norway", "Tier 4": "Uruguay", "Tier 5": "Paraguay", "Tier 6": "Ghana", "Tier 7": "South Africa"}, "Peter Jough": {"Tier 1": "France", "Tier 2": "Portugal", "Tier 3": "Croatia", "Tier 4": "Japan", "Tier 5": "Canada", "Tier 6": "South Korea", "Tier 7": "New Zealand"}, "Sal Mastrobattista": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "Colombia", "Tier 4": "Turkey", "Tier 5": "Canada", "Tier 6": "Ivory Coast", "Tier 7": "Saudi Arabia"}, "Sasha Tarnoczy": {"Tier 1": "France", "Tier 2": "Portugal", "Tier 3": "Norway", "Tier 4": "Ecuador", "Tier 5": "Paraguay", "Tier 6": "Ivory Coast", "Tier 7": "South Africa"}, "Sebastian Castro": {"Tier 1": "Argentina", "Tier 2": "Portugal", "Tier 3": "Mexico", "Tier 4": "Japan", "Tier 5": "Praguay", "Tier 6": "South Korea", "Tier 7": "Saudi Arabia"}, "Shawn Siegel": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "USA", "Tier 4": "Japan", "Tier 5": "Canada", "Tier 6": "Ivory Coast", "Tier 7": "Uzbekistan"}, "Steve Rosegger": {"Tier 1": "Spain", "Tier 2": "Portugal", "Tier 3": "USA", "Tier 4": "Switzlerland", "Tier 5": "Canada", "Tier 6": "Ivory Coast", "Tier 7": "DR Congo"}, "Suzie Morales": {"Tier 1": "Brazil", "Tier 2": "Germany", "Tier 3": "Norway", "Tier 4": "Switzerland", "Tier 5": "Sweden", "Tier 6": "Scotland", "Tier 7": "South Africa"}}, "part3": {"Aaron Condron": {"Winner": "France", "Finalist": "Spain", "3rd": "England", "4th": "Brazil"}, "Adrian Salonga": {"Winner": "Spain", "Finalist": "Portugal", "3rd": "France", "4th": "Brazil"}, "Ajay Sameer": {"Winner": "France", "Finalist": "Portugal", "3rd": "Spain", "4th": "Brazil"}, "Alan Evans": {"Winner": "Spain", "Finalist": "France", "3rd": "Brazil", "4th": "Portugal"}, "Alessandro Mannino": {"Winner": "Spain", "Finalist": "Brazil", "3rd": "France", "4th": "Argentina"}, "Alex Bayer": {"Winner": "Argentina", "Finalist": "Spain", "3rd": "Brazil", "4th": "Netherlands"}, "Ana Sosa": {"Winner": "France", "Finalist": "Argentina", "3rd": "Brazil", "4th": "Germany"}, "Arthur Munoz": {"Winner": "Spain", "Finalist": "Portugal", "3rd": "France", "4th": "Brazil"}, "Dhyuti Patel": {"Winner": "Spain", "Finalist": "France", "3rd": "England", "4th": "Brazil"}, "Federico Segui": {"Winner": "Brazil", "Finalist": "Germany", "3rd": "France", "4th": "Netherlands"}, "Gabriel Murrillo": {"Winner": "Brazil", "Finalist": "Spain", "3rd": "Colombia", "4th": "Germany"}, "Gina Lee": {"Winner": "Argentina", "Finalist": "Brazil", "3rd": "Portugal", "4th": "France"}, "Josh Essig": {"Winner": "Spain", "Finalist": "France", "3rd": "Portugal", "4th": "England"}, "Josh Levy": {"Winner": "Spain", "Finalist": "France", "3rd": "Portugal", "4th": "Argentina"}, "Manuel Beita": {"Winner": "France", "Finalist": "Argentina", "3rd": "Spain", "4th": "Portugal"}, "Mauricio Roldan": {"Winner": "Spain", "Finalist": "France", "3rd": "England", "4th": "Argentina"}, "Michael Bollhardt": {"Winner": "Spain", "Finalist": "France", "3rd": "Argentina", "4th": "England"}, "Nana Boyer": {"Winner": "France", "Finalist": "USA", "3rd": "Portugal", "4th": "Norway"}, "Peter Jough": {"Winner": "France", "Finalist": "Argentina", "3rd": "Spain", "4th": "Japan"}, "Sal Mastrobattista": {"Winner": "Spain", "Finalist": "Argentina", "3rd": "France", "4th": "England"}, "Sasha Tarnoczy": {"Winner": "France", "Finalist": "Portugal", "3rd": "England", "4th": "Spain"}, "Sebastian Castro": {"Winner": "Argentina", "Finalist": "Spain", "3rd": "France", "4th": "Japan"}, "Shawn Siegel": {"Winner": "Spain", "Finalist": "Argentina", "3rd": "France", "4th": "Brazil"}, "Steve Rosegger": {"Winner": "Spain", "Finalist": "England", "3rd": "France", "4th": "Argentina"}, "Suzie Morales": {"Winner": "France", "Finalist": "Spain", "3rd": "Brazil", "4th": "England"}}, "groups": {"A": ["Mexico", "South Korea", "Czechia", "South Africa"], "B": ["Switzerland", "Canada", "Qatar", "Bosnia & Herzegovina"], "C": ["Brazil", "Morocco", "Scotland", "Haiti"], "D": ["USA", "Turkey", "Australia", "Paraguay"], "E": ["Germany", "Ecuador", "Ivory Coast", "Curaçao"], "F": ["Netherlands", "Japan", "Sweden", "Tunisia"], "G": ["Belgium", "Iran", "Egypt", "New Zealand"], "H": ["Spain", "Uruguay", "Saudi Arabia", "Cape Verde"], "I": ["France", "Senegal", "Norway", "Iraq"], "J": ["Argentina", "Austria", "Algeria", "Jordan"], "K": ["Portugal", "Colombia", "DR Congo", "Uzbekistan"], "L": ["England", "Croatia", "Panama", "Ghana"]}, "teams_meta": {"Mexico": {"seed": 15, "group": "A"}, "South Korea": {"seed": 25, "group": "A"}, "Czechia": {"seed": 41, "group": "A"}, "South Africa": {"seed": 60, "group": "A"}, "Switzerland": {"seed": 19, "group": "B"}, "Canada": {"seed": 30, "group": "B"}, "Qatar": {"seed": 55, "group": "B"}, "Bosnia & Herzegovina": {"seed": 65, "group": "B"}, "Brazil": {"seed": 6, "group": "C"}, "Morocco": {"seed": 8, "group": "C"}, "Scotland": {"seed": 43, "group": "C"}, "Haiti": {"seed": 83, "group": "C"}, "USA": {"seed": 16, "group": "D"}, "Turkey": {"seed": 22, "group": "D"}, "Australia": {"seed": 27, "group": "D"}, "Paraguay": {"seed": 40, "group": "D"}, "Germany": {"seed": 10, "group": "E"}, "Ecuador": {"seed": 23, "group": "E"}, "Ivory Coast": {"seed": 34, "group": "E"}, "Curaçao": {"seed": 82, "group": "E"}, "Netherlands": {"seed": 7, "group": "F"}, "Japan": {"seed": 18, "group": "F"}, "Sweden": {"seed": 38, "group": "F"}, "Tunisia": {"seed": 44, "group": "F"}, "Belgium": {"seed": 9, "group": "G"}, "Iran": {"seed": 21, "group": "G"}, "Egypt": {"seed": 29, "group": "G"}, "New Zealand": {"seed": 85, "group": "G"}, "Spain": {"seed": 2, "group": "H"}, "Uruguay": {"seed": 17, "group": "H"}, "Saudi Arabia": {"seed": 61, "group": "H"}, "Cape Verde": {"seed": 69, "group": "H"}, "France": {"seed": 1, "group": "I"}, "Senegal": {"seed": 14, "group": "I"}, "Norway": {"seed": 31, "group": "I"}, "Iraq": {"seed": 57, "group": "I"}, "Argentina": {"seed": 3, "group": "J"}, "Austria": {"seed": 24, "group": "J"}, "Algeria": {"seed": 28, "group": "J"}, "Jordan": {"seed": 63, "group": "J"}, "Portugal": {"seed": 5, "group": "K"}, "Colombia": {"seed": 13, "group": "K"}, "DR Congo": {"seed": 46, "group": "K"}, "Uzbekistan": {"seed": 50, "group": "K"}, "England": {"seed": 4, "group": "L"}, "Croatia": {"seed": 11, "group": "L"}, "Panama": {"seed": 33, "group": "L"}, "Ghana": {"seed": 74, "group": "L"}, "Finish": {"seed": null, "group": "Prizes"}, "Final 1st": {"seed": null, "group": 400.0}, "Final 2nd": {"seed": null, "group": 150.0}, "Final 3rd": {"seed": null, "group": 100.0}, "Group 1st": {"seed": null, "group": 200.0}, "Group 2nd": {"seed": null, "group": 100.0}, "Group 3rd": {"seed": null, "group": 50.0}, "Prize Pool:": {"seed": null, "group": 1000.0}}, "unresolved": {}, "autofilled": [["Gabriel Murrillo", "K", "Uzbekistan", 4]]};
+
+/* ======= RESULTS: the host edits this block, then commits to update the live site =======
+   phase: "preseason" | "group" | "knockout" | "final"
+   groupStandings: actual finish per group, in order [1st,2nd,3rd,4th]
+   teamPoints: per team {gs: group-stage pts, ko: knockout pts}  (only teams someone picked in a tier matter)
+   finalFour: actual {winner, finalist, third, fourth}
+*/
+const RESULTS = {
+  phase: "group",
+  groupStandings: { A: ["Mexico", null, null, "South Africa"] },
+  teamPoints: {},          // e.g. "France":{gs:9,ko:12}
+  finalFour: { winner:null, finalist:null, third:null, fourth:null }
+};
+/* ======================================================================================= */
+
+/* Optional: the full team roster for each tier, used to show which teams nobody picked.
+   Paste each tier's complete list of teams. Leave empty to hide that stat. */
+const TIER_ROSTERS = {
+  "Tier 1": [], "Tier 2": [], "Tier 3": [], "Tier 4": [],
+  "Tier 5": [], "Tier 6": [], "Tier 7": []
+};
+
+/* ===== LIVE SYNC (optional) — update scores for everyone without touching GitHub =====
+   One-time setup with a free JSONBin.io account (~5 min):
+     1. Sign up at jsonbin.io (free).
+     2. Create a new bin, paste  {}  as its content, click Create.
+     3. From the bin's URL, copy the BIN ID into SYNC.binId below.
+     4. Open API Keys, copy your X-ACCESS KEY into SYNC.readKey below.
+     5. Commit this file ONCE. After that you never commit again —
+        just use "Publish to everyone" in the results panel (the footer diamond).
+   Leave binId empty to stay in manual mode (generate-code + commit). */
+const SYNC = { binId: "", readKey: "" };
+
+const SLOT={Winner:1,Finalist:2,"3rd":3,"4th":4};
+const SLOTVAL={Winner:14,Finalist:10,"3rd":6,"4th":4};
+const GROUPS=Object.keys(DATA.groups);
+const TIERS=["Tier 1","Tier 2","Tier 3","Tier 4","Tier 5","Tier 6","Tier 7"];
+
+function teamPts(t){const p=RESULTS.teamPoints[t];return p?{gs:+p.gs||0,ko:+p.ko||0}:{gs:0,ko:0};}
+function actualFinish(team){const f=RESULTS.finalFour;if(team===f.winner)return 1;if(team===f.finalist)return 2;if(team===f.third)return 3;if(team===f.fourth)return 4;return 99;}
+
+function part1(name){ // group rankings score + per-group detail
+  let total=0; const detail={};
+  const picks=DATA.part1[name];
+  for(const g of GROUPS){
+    const me=picks[g]; const act=RESULTS.groupStandings[g];
+    if(!me){detail[g]={pts:null,hits:[]};continue;}
+    if(!act){detail[g]={pts:null,hits:[]};continue;}
+    const complete=act.length>=4&&act.slice(0,4).every(x=>x);
+    const hits=[]; for(let i=1;i<=4;i++){if(act[i-1]&&me[i]===act[i-1])hits.push(i);}
+    if(!complete){detail[g]={pts:null,hits,partial:true};continue;}
+    const top2=me[1]===act[0]&&me[2]===act[1];
+    const all4=top2&&me[3]===act[2]&&me[4]===act[3];
+    const pts=all4?7:(top2?3:0);
+    total+=pts; detail[g]={pts,hits,top2,all4};
+  }
+  return {total,detail};
+}
+function part2(name){let gs=0,full=0;const detail={};
+  for(const t of TIERS){const pick=DATA.part2[name][t];const p=teamPts(pick);
+    gs+=p.gs;full+=p.gs+p.ko;detail[t]={pick,gs:p.gs,full:p.gs+p.ko};}
+  return {gs,full,detail};
+}
+function part3(name){let total=0;const detail={};
+  for(const s of Object.keys(SLOT)){const pick=DATA.part3[name][s];const a=actualFinish(pick);
+    let pts=0;if(a<=SLOT[s])pts=SLOTVAL[s];else if(a<=4)pts=4;
+    total+=pts;detail[s]={pick,pts,actual:a};}
+  return {total,detail};
+}
+function scores(name){const p1=part1(name),p2=part2(name),p3=part3(name);
+  return{p1,p2,p3,group:p1.total+p2.gs,tourn:p2.full+p3.total};}
+
+function payouts(arr,prizes){ // arr sorted desc by score; prizes=[1st,2nd,3rd]
+  const pay={};let pos=0;
+  while(pos<arr.length&&pos<3){
+    let k=1;while(pos+k<arr.length&&arr[pos+k].score===arr[pos].score)k++;
+    let sum=0;for(let i=pos;i<pos+k&&i<3;i++)sum+=prizes[i];
+    const each=sum/k;for(let i=pos;i<pos+k;i++)pay[arr[i].name]=each;
+    pos+=k;
+  }
+  return pay;
+}
+const $=s=>document.querySelector(s);
+const money=n=>n?("$"+(Number.isInteger(n)?n:n.toFixed(2))):"";
+
+/* ---------- standings ---------- */
+let boardMode="group";
+let lastUpdated="";
+function renderBoard(){
+  const all=DATA.participants.map(n=>({name:n,s:scores(n)}));
+  const key=boardMode==="group"?"group":"tourn";
+  const arr=all.map(x=>({name:x.name,score:x.s[key],s:x.s})).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
+  const prizes=boardMode==="group"?[200,100,50]:[400,150,100];
+  const live=boardMode==="group"?(RESULTS.phase!=="preseason"):(RESULTS.phase==="final");
+  const pay=live?payouts(arr,prizes):{};
+  const c1=boardMode==="group"?"Groups":"Tiers", c2=boardMode==="group"?"Tiers":"Final 4";
+  let h=`<div class="brow head" style="--cols:2"><span class="rk">#</span><span class="nm">Entry</span><span class="hide-m">${c1}</span><span class="hide-m">${c2}</span><span>Pts</span><span>Prize</span></div>`;
+  arr.forEach((r,i)=>{
+    const pos=i<3&&(i===0||arr[i-1].score!==r.score)?(i+1):(arr.findIndex(x=>x.score===r.score)+1);
+    const rank=arr.filter(x=>x.score>r.score).length+1;
+    const cls=rank<=3?("p"+rank):"";
+    const a=boardMode==="group"?r.s.p1.total:r.s.p2.full;
+    const b=boardMode==="group"?r.s.p2.gs:r.s.p3.total;
+    const flag=DATA.unresolved[r.name]?'<span class="flag" title="Group picks not submitted">no groups</span>':'';
+    const pv=pay[r.name];
+    h+=`<div class="brow ${cls}" style="--cols:2">
+      <span class="rk">${rank}</span>
+      <span class="nm"><b>${r.name}</b>${flag}</span>
+      <span class="cell hide-m">${a}</span>
+      <span class="cell hide-m">${b}</span>
+      <span class="tot">${r.score}</span>
+      <span class="pay ${pv?'':'none'}">${live?(pv?money(pv):"&mdash;"):"&mdash;"}</span></div>`;
+  });
+  $("#board").innerHTML=h;
+  $("#boardTitle").textContent=boardMode==="group"?"Group-stage race":"Tournament race";
+  $("#boardSub").textContent=boardMode==="group"?"Group rankings + tier picks, scored through the group stage":"Tier picks (whole tournament) + final-four picks";
+  const tg=$("#boardToggle");tg.className="toggle "+(boardMode==="group"?"grp":"trn");
+  let note=live?"Prizes shown reflect current standings. Ties split the combined prize money.":
+    (boardMode==="group"?"Prizes appear once group-stage results are entered.":"Prizes appear once the tournament is complete.");
+  if(SYNC.binId)note+=lastUpdated?(" &middot; Updated "+new Date(lastUpdated).toLocaleString()):" &middot; Live sync on";
+  $("#boardNote").innerHTML=note;
+}
+
+/* ---------- picks grid + modal ---------- */
+function renderPicks(){
+  let h="";
+  DATA.participants.forEach(n=>{
+    const p3=DATA.part3[n];const p2=DATA.part2[n];
+    const f4=[['Champion',p3.Winner],['Runner-up',p3.Finalist],['3rd place',p3['3rd']],['4th place',p3['4th']]];
+    h+=`<button class="pcard" data-n="${n}"><h3>${n}</h3><div class="ppk">`;
+    f4.forEach(([k,v])=>{h+=`<div class="pp"><span class="ppk-k">${k}</span><span class="ppk-v">${v||'&mdash;'}</span></div>`;});
+    h+=`</div><div class="ptiers">`;
+    TIERS.forEach((t,i)=>{h+=`<span class="tchip" title="${t}">${p2[t]||'&mdash;'}</span>`;});
+    h+=`</div><div class="pmore">See all 12 group rankings &rarr;</div></button>`;
+  });
+  $("#pgrid").innerHTML=h;
+}
+function openModal(n){
+  const s=scores(n);const noG=DATA.unresolved[n];
+  let h=`<div class="mtop"><div><h2>${n}</h2>
+    <div class="mscore">
+      <div class="grp"><div class="k">Group race</div><div class="v">${s.group}</div></div>
+      <div class="trn"><div class="k">Tournament race</div><div class="v">${s.tourn}</div></div>
+    </div></div><button class="x" id="closeX">&times;</button></div>`;
+  // final four
+  h+=`<div class="mh">Final four &middot; Part 3</div><div class="f4">`;
+  for(const sl of Object.keys(SLOT)){const d=s.p3.detail[sl];
+    h+=`<div class="slot"><div class="k">${sl}</div><div class="v">${d.pick||'&mdash;'}</div>
+      <div class="pts">${RESULTS.phase==='final'?d.pts+' pts':SLOTVAL[sl]+' max'}</div></div>`;}
+  h+=`</div>`;
+  // tiers
+  h+=`<div class="mh">Tier picks &middot; Part 2</div><div class="tiers">`;
+  for(const t of TIERS){const d=s.p2.detail[t];
+    h+=`<div class="tier"><div class="k">${t}</div><div class="v"><span>${d.pick||'&mdash;'}</span><span class="pts">${d.full>0?d.full+'p':''}</span></div></div>`;}
+  h+=`</div>`;
+  // groups
+  h+=`<div class="mh">Group rankings &middot; Part 1${noG?' &mdash; not submitted':''}</div>`;
+  if(noG){h+=`<div class="missing">This entry's group rankings weren't submitted in a usable format, so they score 0 in Part 1. Tier and final-four picks are unaffected.</div>`;}
+  else{
+    h+=`<div class="ggrid">`;
+    for(const g of GROUPS){const me=DATA.part1[n][g];const det=s.p1.detail[g];
+      const gpTxt=det.pts!=null?det.pts+'p':(det.partial?'<span style="color:var(--ok);font-weight:700">live</span>':'');
+      h+=`<div class="gtab"><div class="gh"><span>Group ${g}</span><span class="gp">${gpTxt}</span></div><ol>`;
+      for(let i=1;i<=4;i++){const hit=det.hits&&det.hits.includes(i);
+        h+=`<li class="${hit?'hit':''}">${me[i]}</li>`;}
+      h+=`</ol></div>`;}
+    h+=`</div>`;
+  }
+  $("#modal").innerHTML=h;$("#scrim").classList.add("show");
+  $("#closeX").onclick=()=>$("#scrim").classList.remove("show");
+}
+
+/* ---------- stats ---------- */
+function pct(n,d){return Math.round(100*n/d);}
+function renderStats(){
+  const N=DATA.participants.length;const cards=[];
+  // 1. Champion picks distribution
+  const champ={};DATA.participants.forEach(n=>{const c=DATA.part3[n].Winner;if(c)champ[c]=(champ[c]||0)+1;});
+  const champArr=Object.entries(champ).sort((a,b)=>b[1]-a[1]);
+  let c1=`<div class="scard"><h3>Who they're crowning</h3><div class="cap">Part 3 champion picks across ${N} entries</div><div class="bars">`;
+  champArr.forEach(([t,c])=>{c1+=barRow(t,c,N,'--gold');});
+  c1+=`</div></div>`;cards.push(c1);
+  // 2. Most-backed finalist (top-4 appearances)
+  const f4={};DATA.participants.forEach(n=>{const p=DATA.part3[n];[p.Winner,p.Finalist,p["3rd"],p["4th"]].forEach(t=>{if(t)f4[t]=(f4[t]||0)+1;});});
+  const f4Arr=Object.entries(f4).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  let c2=`<div class="scard"><h3>Final-four magnets</h3><div class="cap">Every team named anywhere in entrants' top 4</div><div class="bars">`;
+  f4Arr.forEach(([t,c])=>{c2+=barRow(t,c,N,'--trn');});
+  c2+=`</div></div>`;cards.push(c2);
+  // 3. Tier consensus vs split (entropy-ish: top pick share)
+  let c3=`<div class="scard"><h3>Chalk vs chaos</h3><div class="cap">Per tier: how much the room agrees on its top pick</div><div class="bars">`;
+  TIERS.forEach(t=>{const cnt={};DATA.participants.forEach(n=>{const p=DATA.part2[n][t];if(p)cnt[p]=(cnt[p]||0)+1;});
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+    c3+=`<div class="barrow"><span class="lab">${t} &middot; ${top[0]}</span><div class="track"><div class="fill" style="width:${pct(top[1],N)}%;background:var(--grp)"></div></div><span class="pc">${pct(top[1],N)}%</span></div>`;});
+  c3+=`</div></div>`;cards.push(c3);
+  // 4. Lone wolves: unique tier picks (only one person)
+  const lone=[];
+  TIERS.forEach(t=>{const cnt={};DATA.participants.forEach(n=>{const p=DATA.part2[n][t];if(p)(cnt[p]=cnt[p]||[]).push(n);});
+    Object.entries(cnt).forEach(([team,who])=>{if(who.length===1)lone.push({who:who[0],what:`only ${team} in ${t}`});});});
+  // also unique champions
+  champArr.forEach(([t,c])=>{if(c===1){const w=DATA.participants.find(n=>DATA.part3[n].Winner===t);lone.push({who:w,what:`lone ${t} to win it all`});}});
+  let c4=`<div class="scard"><h3>Lone wolves</h3><div class="cap">Picks nobody else made</div><div class="lone">`;
+  lone.slice(0,9).forEach(l=>{c4+=`<div class="li"><span class="who">${l.who}</span><span class="what"><b>${l.what}</b></span></div>`;});
+  if(!lone.length)c4+=`<div class="li">No solo picks &mdash; a very agreeable bunch.</div>`;
+  c4+=`</div></div>`;cards.push(c4);
+  // 5. Bracket twins: most similar pairs (shared group orderings + tiers + finals)
+  function sig(n){const a=[];GROUPS.forEach(g=>{const m=DATA.part1[n][g];a.push(m?[m[1],m[2],m[3],m[4]].join('>'):'-');});
+    TIERS.forEach(t=>a.push(DATA.part2[n][t]||'-'));Object.keys(SLOT).forEach(s=>a.push(DATA.part3[n][s]||'-'));return a;}
+  const sigs={};DATA.participants.forEach(n=>sigs[n]=sig(n));
+  const pairs=[];const P=DATA.participants;
+  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){
+    let same=0,tot=0;const A=sigs[P[i]],B=sigs[P[j]];
+    for(let k=0;k<A.length;k++){if(A[k]==='-'||B[k]==='-')continue;tot++;if(A[k]===B[k])same++;}
+    if(tot>10)pairs.push({a:P[i],b:P[j],pc:Math.round(100*same/tot)});}
+  pairs.sort((x,y)=>y.pc-x.pc);
+  let c5=`<div class="scard twins"><h3>Bracket twins</h3><div class="cap">Entries whose picks line up the most</div><div class="lone">`;
+  pairs.slice(0,6).forEach(p=>{c5+=`<div class="li"><span class="who">${p.a} &amp; ${p.b}</span><span class="what"><b>${p.pc}% aligned</b></span></div>`;});
+  c5+=`</div></div>`;cards.push(c5);
+  // 6. Contrarian index: who agrees least with the consensus group orderings
+  const consensus={};GROUPS.forEach(g=>{const cnt={};DATA.participants.forEach(n=>{const m=DATA.part1[n][g];if(m){const k=[m[1],m[2],m[3],m[4]].join('>');cnt[k]=(cnt[k]||0)+1;}});
+    consensus[g]=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];});
+  const contr=DATA.participants.filter(n=>!DATA.unresolved[n]).map(n=>{let off=0;GROUPS.forEach(g=>{const m=DATA.part1[n][g];if(m&&[m[1],m[2],m[3],m[4]].join('>')!==consensus[g])off++;});return{n,off};}).sort((a,b)=>b.off-a.off);
+  let c6=`<div class="scard"><h3>Against the grain</h3><div class="cap">Most group orders that differ from the crowd favorite (of 12)</div><div class="lone">`;
+  contr.slice(0,8).forEach(x=>{c6+=`<div class="li"><span class="who">${x.n}</span><span class="what"><b>${x.off}</b> off-consensus</span></div>`;});
+  c6+=`</div></div>`;cards.push(c6);
+  // 7. Host nations: who backed USA / Mexico / Canada in their final four
+  const HOSTS=['USA','Mexico','Canada'];const hostCount={USA:0,Mexico:0,Canada:0};let anyHost=0;
+  DATA.participants.forEach(n=>{const p=DATA.part3[n];const f=[p.Winner,p.Finalist,p['3rd'],p['4th']];
+    let has=false;HOSTS.forEach(hh=>{if(f.includes(hh)){hostCount[hh]++;has=true;}});if(has)anyHost++;});
+  let c7=`<div class="scard"><h3>Backing the hosts</h3><div class="cap">United 2026 is played in the USA, Mexico &amp; Canada. Who put a host in their top 4?</div>
+    <div class="big gold">${pct(anyHost,N)}%</div>
+    <div style="text-align:center;color:var(--muted);font-size:12.5px;margin:-2px 0 16px">of entries have at least one host nation in their final four</div><div class="bars">`;
+  HOSTS.forEach(hh=>{c7+=barRow(hh,hostCount[hh],N,'--grp');});
+  c7+=`</div></div>`;cards.push(c7);
+  // 8. Teams nobody picked, per tier (needs TIER_ROSTERS)
+  const haveRosters=Object.values(TIER_ROSTERS).some(a=>a&&a.length);
+  let c8=`<div class="scard"><h3>Nobody's guys</h3><div class="cap">Teams in each tier that not one entry drafted</div><div class="lone">`;
+  if(!haveRosters){
+    c8+=`<div class="li">Add the seven tier rosters to reveal which teams nobody backed.</div>`;
+  } else {
+    let any=false;
+    TIERS.forEach(t=>{const roster=TIER_ROSTERS[t]||[];if(!roster.length)return;
+      const picked=new Set();DATA.participants.forEach(n=>{const p=DATA.part2[n][t];if(p)picked.add(p);});
+      const never=roster.filter(x=>!picked.has(x));
+      if(never.length){any=true;c8+=`<div class="li"><span class="who">${t}</span><span class="what"><b>${never.join(', ')}</b></span></div>`;}});
+    if(!any)c8+=`<div class="li">Every team in every tier got at least one pick.</div>`;
+  }
+  c8+=`</div></div>`;cards.push(c8);
+  $("#scards").innerHTML=cards.join("");
+}
+function barRow(lab,c,N,col){return `<div class="barrow"><span class="lab">${lab}</span><div class="track"><div class="fill" style="width:${pct(c,N)}%;background:var(${col})"></div></div><span class="pc">${c}</span></div>`;}
+
+/* ---------- admin ---------- */
+function tierTeams(){const s=new Set();DATA.participants.forEach(n=>TIERS.forEach(t=>{const p=DATA.part2[n][t];if(p)s.add(p);}));
+  return [...s].sort();}
+function allTeams(){const s=new Set();Object.values(DATA.groups).forEach(a=>a.forEach(t=>s.add(t)));return [...s].sort();}
+function renderAdmin(){
+  let h=`<div class="adm"><h3>Tournament phase</h3><div class="cap">Controls which prizes are live.</div>
+    <select id="ph">
+      <option value="preseason">Pre-season &middot; picks locked</option>
+      <option value="group">Group stage in progress</option>
+      <option value="knockout">Knockouts in progress</option>
+      <option value="final">Tournament complete</option>
+    </select></div>`;
+  // groups
+  h+=`<div class="adm"><details><summary>Part 1 &middot; Group final standings</summary><div style="margin-top:12px">`;
+  GROUPS.forEach(g=>{const roster=DATA.groups[g];const cur=RESULTS.groupStandings[g]||[];
+    h+=`<div class="frow"><span class="gl">Grp ${g}</span>`;
+    for(let i=0;i<4;i++){h+=`<select data-gs="${g}" data-pos="${i}"><option value="">${i+1}${['st','nd','rd','th'][i]}</option>`+
+      roster.map(t=>`<option ${cur[i]===t?'selected':''}>${t}</option>`).join('')+`</select>`;}
+    h+=`</div>`;});
+  h+=`</div></details></div>`;
+  // team points
+  h+=`<div class="adm"><details><summary>Part 2 &middot; Team points (group + knockout)</summary>
+    <div class="cap" style="margin-top:10px">Only teams someone picked in a tier affect scoring. Win=3, draw=1, loss=0.</div>
+    <div class="tp" style="color:var(--muted)"><span>Team</span><span style="text-align:center">Group</span><span style="text-align:center">Knockout</span></div>`;
+  tierTeams().forEach(t=>{const p=RESULTS.teamPoints[t]||{};
+    h+=`<div class="tp"><label>${t}</label>
+      <input type="number" min="0" data-tp="${t}" data-fld="gs" value="${p.gs!=null?p.gs:''}" placeholder="0">
+      <input type="number" min="0" data-tp="${t}" data-fld="ko" value="${p.ko!=null?p.ko:''}" placeholder="0"></div>`;});
+  h+=`</details></div>`;
+  // final four
+  h+=`<div class="adm"><details><summary>Part 3 &middot; Final four</summary><div style="margin-top:12px">`;
+  [["winner","Winner"],["finalist","Runner-up"],["third","3rd place"],["fourth","4th place"]].forEach(([k,lab])=>{
+    h+=`<div class="frow" style="grid-template-columns:120px 1fr"><span class="gl">${lab}</span>
+      <select data-f4="${k}"><option value="">&mdash;</option>`+allTeams().map(t=>`<option ${RESULTS.finalFour[k]===t?'selected':''}>${t}</option>`).join('')+`</select></div>`;});
+  h+=`</div></details></div>`;
+  // publish / export
+  h+=`<div class="adm"><h3>Save &amp; publish</h3>`;
+  if(SYNC.binId){
+    h+=`<div class="cap">Your entries already updated your screen. Push them live to everyone &mdash; no GitHub needed.</div>
+      <div class="tp" style="grid-template-columns:1fr auto">
+        <input id="mkey" type="password" placeholder="Your JSONBin master key" value="${getKey()}">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap">
+          <input type="checkbox" id="remember" ${getKey()?'checked':''}> remember on this device</label>
+      </div>
+      <button class="btn" id="pubBtn" style="margin-top:10px">Publish to everyone</button>
+      <details style="margin-top:14px"><summary>Manual backup (generate code)</summary>
+        <div class="steps" style="margin-top:8px">Prefer the file route any time: paste this over the <b>const RESULTS = {…}</b> block and commit.</div>
+        <button class="btn ghost" id="genBtn">Generate code</button>
+        <button class="btn ghost" id="copyBtn" style="display:none">Copy</button>
+        <textarea id="out" style="display:none" readonly></textarea></details>`;
+  } else {
+    h+=`<div class="cap">Live sync is off, so changes show on your screen only. To push updates to everyone without committing each time, set up free live sync (see the SYNC block at the top of index.html). For now, use the code route:</div>
+      <div class="steps">1. <b>Generate code</b>. 2. Copy it. 3. In <b>index.html</b>, replace the <b>const RESULTS = {…}</b> block. 4. Commit to GitHub &mdash; live in ~1 min.</div>
+      <button class="btn" id="genBtn">Generate code</button>
+      <button class="btn ghost" id="copyBtn" style="display:none">Copy</button>
+      <textarea id="out" style="display:none" readonly></textarea>`;
+  }
+  h+=`</div>`;
+  $("#adminMount").innerHTML=h;
+  $("#ph").value=RESULTS.phase;
+  $("#ph").onchange=e=>{RESULTS.phase=e.target.value;refresh();};
+  document.querySelectorAll("[data-gs]").forEach(s=>s.onchange=()=>{
+    const g=s.dataset.gs,pos=+s.dataset.pos;RESULTS.groupStandings[g]=RESULTS.groupStandings[g]||[null,null,null,null];
+    RESULTS.groupStandings[g][pos]=s.value||null;refresh();});
+  document.querySelectorAll("[data-tp]").forEach(inp=>inp.oninput=()=>{
+    const t=inp.dataset.tp;RESULTS.teamPoints[t]=RESULTS.teamPoints[t]||{gs:0,ko:0};
+    RESULTS.teamPoints[t][inp.dataset.fld]=inp.value===''?0:+inp.value;refresh();});
+  document.querySelectorAll("[data-f4]").forEach(s=>s.onchange=()=>{RESULTS.finalFour[s.dataset.f4]=s.value||null;refresh();});
+  $("#genBtn").onclick=()=>{
+    const code="const RESULTS = "+JSON.stringify(cleanResults(),null,2)+";";
+    const ta=$("#out");ta.style.display="block";ta.value=code;$("#copyBtn").style.display="inline-block";};
+  $("#copyBtn").onclick=()=>{$("#out").select();document.execCommand("copy");$("#copyBtn").textContent="Copied";setTimeout(()=>$("#copyBtn").textContent="Copy",1500);};
+  if(SYNC.binId){
+    const pub=$("#pubBtn");
+    pub.onclick=async()=>{
+      const key=$("#mkey").value.trim();
+      if(!key){pub.textContent="Enter your master key first";setTimeout(()=>pub.textContent="Publish to everyone",2000);return;}
+      if($("#remember").checked)setKey(key);else setKey("");
+      const body=cleanResults();body.updated=new Date().toISOString();
+      pub.textContent="Publishing\u2026";pub.disabled=true;
+      try{
+        const r=await fetch("https://api.jsonbin.io/v3/b/"+SYNC.binId,{method:"PUT",
+          headers:{"Content-Type":"application/json","X-Master-Key":key},body:JSON.stringify(body)});
+        if(r.ok){lastUpdated=body.updated;pub.textContent="Published \u2713 live for everyone";refresh();}
+        else pub.textContent="Failed \u2014 check key & bin id";
+      }catch(e){pub.textContent="Failed \u2014 network error";}
+      pub.disabled=false;setTimeout(()=>pub.textContent="Publish to everyone",2800);
+    };
+  }
+}
+function cleanResults(){
+  const c={phase:RESULTS.phase,groupStandings:{},teamPoints:RESULTS.teamPoints,finalFour:RESULTS.finalFour};
+  for(const g in RESULTS.groupStandings){const a=RESULTS.groupStandings[g];if(a&&a.some(x=>x))c.groupStandings[g]=a;}
+  return c;
+}
+function getKey(){try{return localStorage.getItem("ltvKey")||""}catch(e){return ""}}
+function setKey(k){try{k?localStorage.setItem("ltvKey",k):localStorage.removeItem("ltvKey")}catch(e){}}
+function refresh(){
+  const txt={preseason:"Picks locked &middot; awaiting kickoff",group:"Group stage in progress",knockout:"Knockout rounds in progress",final:"Champions crowned &middot; final standings"}[RESULTS.phase];
+  $("#phaseTxt").innerHTML=txt;
+  renderBoard();renderPicks();renderStats();
+}
+
+/* ---------- nav + init ---------- */
+function showSection(id){
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x.dataset.t===id));
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("show",s.id===id));
+  window.scrollTo({top:0});
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>showSection(b.dataset.t));
+$("#adminDot").onclick=()=>showSection("update");
+$("#boardToggle").addEventListener("click",e=>{if(e.target.dataset.b){boardMode=e.target.dataset.b;
+  $("#boardToggle").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.b===boardMode));renderBoard();}});
+document.addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)openModal(c.dataset.n);});
+$("#scrim").addEventListener("click",e=>{if(e.target===$("#scrim"))$("#scrim").classList.remove("show");});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#scrim").classList.remove("show");});
+
+async function fetchRemote(){
+  if(!SYNC.binId)return false;
+  try{
+    const r=await fetch("https://api.jsonbin.io/v3/b/"+SYNC.binId+"/latest",
+      {headers:SYNC.readKey?{"X-Access-Key":SYNC.readKey}:{}});
+    if(!r.ok)return false;
+    const rec=(await r.json()).record;
+    if(rec&&rec.phase){
+      RESULTS.phase=rec.phase;
+      RESULTS.groupStandings=rec.groupStandings||{};
+      RESULTS.teamPoints=rec.teamPoints||{};
+      RESULTS.finalFour=rec.finalFour||{winner:null,finalist:null,third:null,fourth:null};
+      lastUpdated=rec.updated||lastUpdated;
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+async function init(){ await fetchRemote(); renderAdmin(); refresh(); }
+async function poll(){ // keep viewers current, but never clobber the host mid-edit
+  if(document.getElementById("update").classList.contains("show"))return;
+  if(await fetchRemote())refresh();
+}
+init();
+if(SYNC.binId)setInterval(poll,60000);
+</script>
+</body>
+</html>
