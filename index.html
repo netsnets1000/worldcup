@@ -86,6 +86,10 @@ section.show{display:block}
 .brow.head .nm{text-align:left}
 .brow:last-child{border-bottom:0}
 .brow:not(.head):hover{background:var(--panel)}
+.brow:not(.head){cursor:pointer}
+.wflag{font-size:17px;line-height:1;flex-shrink:0}
+.nm .arrow{color:var(--dim);font-size:17px;margin-left:auto;padding-left:8px;opacity:0;transition:.15s}
+.brow:not(.head):hover .arrow{opacity:1;color:var(--chalk)}
 .rk{font-family:"Space Mono";font-weight:700;font-size:16px;color:var(--muted);text-align:center}
 .brow.p1 .rk,.brow.p2 .rk,.brow.p3 .rk{color:var(--pitch);border-radius:7px;height:30px;line-height:30px;width:30px;margin:0 auto}
 .brow.p1 .rk{background:var(--gold)} .brow.p2 .rk{background:var(--silver)} .brow.p3 .rk{background:var(--bronze)}
@@ -306,6 +310,7 @@ const SLOT={Winner:1,Finalist:2,"3rd":3,"4th":4};
 const SLOTVAL={Winner:14,Finalist:10,"3rd":6,"4th":4};
 const GROUPS=Object.keys(DATA.groups);
 const TIERS=["Tier 1","Tier 2","Tier 3","Tier 4","Tier 5","Tier 6","Tier 7"];
+const FLAG = {"Mexico": "🇲🇽", "South Korea": "🇰🇷", "Czechia": "🇨🇿", "South Africa": "🇿🇦", "Switzerland": "🇨🇭", "Canada": "🇨🇦", "Qatar": "🇶🇦", "Bosnia & Herzegovina": "🇧🇦", "Brazil": "🇧🇷", "Morocco": "🇲🇦", "Haiti": "🇭🇹", "USA": "🇺🇸", "Turkey": "🇹🇷", "Australia": "🇦🇺", "Paraguay": "🇵🇾", "Germany": "🇩🇪", "Ecuador": "🇪🇨", "Ivory Coast": "🇨🇮", "Curaçao": "🇨🇼", "Netherlands": "🇳🇱", "Japan": "🇯🇵", "Sweden": "🇸🇪", "Tunisia": "🇹🇳", "Belgium": "🇧🇪", "Iran": "🇮🇷", "Egypt": "🇪🇬", "New Zealand": "🇳🇿", "Spain": "🇪🇸", "Uruguay": "🇺🇾", "Saudi Arabia": "🇸🇦", "Cape Verde": "🇨🇻", "France": "🇫🇷", "Senegal": "🇸🇳", "Norway": "🇳🇴", "Iraq": "🇮🇶", "Argentina": "🇦🇷", "Austria": "🇦🇹", "Algeria": "🇩🇿", "Jordan": "🇯🇴", "Portugal": "🇵🇹", "Colombia": "🇨🇴", "DR Congo": "🇨🇩", "Uzbekistan": "🇺🇿", "Croatia": "🇭🇷", "Panama": "🇵🇦", "Ghana": "🇬🇭", "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"};
 
 function teamPts(t){const p=RESULTS.teamPoints[t];return p?{gs:+p.gs||0,ko:+p.ko||0}:{gs:0,ko:0};}
 function actualFinish(team){const f=RESULTS.finalFour;if(team===f.winner)return 1;if(team===f.finalist)return 2;if(team===f.third)return 3;if(team===f.fourth)return 4;return 99;}
@@ -367,16 +372,17 @@ function renderBoard(){
   const c1=boardMode==="group"?"Groups":"Tiers", c2=boardMode==="group"?"Tiers":"Final 4";
   let h=`<div class="brow head" style="--cols:2"><span class="rk">#</span><span class="nm">Entry</span><span class="hide-m">${c1}</span><span class="hide-m">${c2}</span><span>Pts</span><span>Prize</span></div>`;
   arr.forEach((r,i)=>{
-    const pos=i<3&&(i===0||arr[i-1].score!==r.score)?(i+1):(arr.findIndex(x=>x.score===r.score)+1);
     const rank=arr.filter(x=>x.score>r.score).length+1;
     const cls=rank<=3?("p"+rank):"";
     const a=boardMode==="group"?r.s.p1.total:r.s.p2.full;
     const b=boardMode==="group"?r.s.p2.gs:r.s.p3.total;
-    const flag=DATA.unresolved[r.name]?'<span class="flag" title="Group picks not submitted">no groups</span>':'';
+    const ng=DATA.unresolved[r.name]?'<span class="flag" title="Group picks not submitted">no groups</span>':'';
+    const champ=DATA.part3[r.name].Winner;
+    const wf=champ?`<span class="wflag" title="Champion pick: ${champ}">${FLAG[champ]||'\u{1F3F3}'}</span>`:'';
     const pv=pay[r.name];
-    h+=`<div class="brow ${cls}" style="--cols:2">
+    h+=`<div class="brow ${cls}" style="--cols:2" data-n="${r.name}" title="View ${r.name}'s picks">
       <span class="rk">${rank}</span>
-      <span class="nm"><b>${r.name}</b>${flag}</span>
+      <span class="nm">${wf}<b>${r.name}</b>${ng}<span class="arrow">&rsaquo;</span></span>
       <span class="cell hide-m">${a}</span>
       <span class="cell hide-m">${b}</span>
       <span class="tot">${r.score}</span>
@@ -626,7 +632,8 @@ document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>showSection(b.
 $("#adminDot").onclick=()=>showSection("update");
 $("#boardToggle").addEventListener("click",e=>{if(e.target.dataset.b){boardMode=e.target.dataset.b;
   $("#boardToggle").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.b===boardMode));renderBoard();}});
-document.addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)openModal(c.dataset.n);});
+document.addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c){openModal(c.dataset.n);return;}
+  const row=e.target.closest(".brow[data-n]");if(row)openModal(row.dataset.n);});
 $("#scrim").addEventListener("click",e=>{if(e.target===$("#scrim"))$("#scrim").classList.remove("show");});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#scrim").classList.remove("show");});
 
