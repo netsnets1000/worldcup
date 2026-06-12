@@ -300,7 +300,7 @@ const TIER_ROSTERS = {
      6. Commit this file ONCE. After that you never commit again — just edit the Results tab,
         and the live site updates within a couple of minutes.
    Leave csvUrl empty to use the built-in manual panel (generate-code + commit) instead. */
-const SHEET = { csvUrl: "const SHEET = { csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6YF4Br2XqBh-o8O7uEmTV6fr1zvoTNlw2DkqQKlFCqxqz7CmG4g21LdWVZ6YIGI-uFcUBIdp7-39Y/pub?gid=676509012&single=true&output=csv", editUrl: "" };", editUrl: "" };
+const SHEET = { csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6YF4Br2XqBh-o8O7uEmTV6fr1zvoTNlw2DkqQKlFCqxqz7CmG4g21LdWVZ6YIGI-uFcUBIdp7-39Y/pub?gid=676509012&single=true&output=csv", editUrl: "" };
 
 const SLOT={Winner:1,Finalist:2,"3rd":3,"4th":4};
 const SLOTVAL={Winner:14,Finalist:10,"3rd":6,"4th":4};
@@ -675,7 +675,10 @@ async function fetchRemote(){
     return applySheet(await r.text());
   }catch(e){return false;}
 }
-async function init(){ await fetchRemote(); renderAdmin(); refresh(); }
+async function init(){
+  renderAdmin(); refresh();                       // draw immediately with built-in values
+  try{ if(await fetchRemote()){ renderAdmin(); refresh(); } }catch(e){}  // then layer in live sheet data
+}
 async function poll(){ if(await fetchRemote()){refresh();if(document.getElementById("update").classList.contains("show"))renderSheetPanel();} }
 init();
 if(SHEET.csvUrl)setInterval(poll,90000);
